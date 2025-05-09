@@ -10,7 +10,6 @@ interface Gift {
   price: string
   description: string
   image: string
-  price_id: string
 }
 
 interface GiftCardProps {
@@ -22,7 +21,6 @@ export default function GiftCard({ gift }: GiftCardProps) {
     name: gift.name,
     price: gift.price,
     image: gift.image,
-    priceId: gift.price_id.toString(),
   }).toString()
 
   return (
@@ -45,7 +43,7 @@ export default function GiftCard({ gift }: GiftCardProps) {
       </CardContent>
       <CardFooter>
       <Link href={`/payment?${paymentParams}`} className="w-full">
-          <Button className="w-full bg-rose-600 hover:bg-rose-700 dark:bg-rose-700 dark:hover:bg-rose-600">
+          <Button className="w-full bg-rose-600 hover:bg-rose-700">
             <Heart className="mr-2 h-4 w-4" /> Presentear
           </Button>
         </Link>
