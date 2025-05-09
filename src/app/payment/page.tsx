@@ -1,78 +1,86 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
-import Image from "next/image"
-import Link from "next/link"
-import { ArrowLeft, Check } from "lucide-react"
-import { Button } from "@/components/ui/Button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card"
-import { gerarLinkDePagamento } from "@/services/payments"
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowLeft, Check } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/Card";
+import { gerarLinkDePagamento } from "@/services/payments";
 
 export default function PaymentPage() {
-  const searchParams = useSearchParams()
-  const [paymentComplete, setPaymentComplete] = useState(false)
-  const [paymentUrl, setPaymentUrl] = useState<string | null>(null)
+  const searchParams = useSearchParams();
+  const [paymentComplete, setPaymentComplete] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
 
-  const giftName = searchParams.get("name") || "Presente"
-  const giftPrice = searchParams.get("price") || "R$ 0,00"
-  const giftImage = searchParams.get("image") || "/placeholder.svg?height=300&width=300"
+  const giftName = searchParams.get("name") || "Presente";
+  const giftPrice = searchParams.get("price") || "R$ 0,00";
+  const giftImage =
+    searchParams.get("image") || "/placeholder.svg?height=300&width=300";
 
   const convertPriceToIntCents = (price: string): number => {
     const numericValue = Number(price.replace("R$ ", "").replace(",", "."));
     return Math.round(numericValue * 100);
   };
 
-  const handledLinkPaymentCreate = async() => {
+  const handledLinkPaymentCreate = async () => {
     try {
-        const payload = {
-          is_building: false,
-          payment_settings: {
-            credit_card_settings: {
-              installments: [
-                {
-                  number: 1,
-                  total: Number(convertPriceToIntCents(giftPrice)),
-                },
-                {
-                  number: 2,
-                  total: Number(convertPriceToIntCents(giftPrice) / 2),
-                },
-                {
-                  number: 3,
-                  total: Number(convertPriceToIntCents(giftPrice) / 3),
-                }
-              ],
-              operation_type: "auth_and_capture"
-            },
-            pix_settings: {
-              expires_in: 3600,
-            },
-            accepted_payment_methods: ["credit_card", "pix"],
-          },
-          cart_settings: {
-            items: [
+      const payload = {
+        is_building: false,
+        payment_settings: {
+          credit_card_settings: {
+            installments: [
               {
-                amount: convertPriceToIntCents(giftPrice),
-                name: giftName,
-                default_quantity: 1,
-              }
-            ]
+                number: 1,
+                total: Math.round(convertPriceToIntCents(giftPrice)),
+              },
+              {
+                number: 2,
+                total: Math.round(convertPriceToIntCents(giftPrice) / 2),
+              },
+              {
+                number: 3,
+                total: Math.round(convertPriceToIntCents(giftPrice) / 3),
+              },
+            ],
+            operation_type: "auth_and_capture",
           },
-          name: giftName,
-          type: "order"
-        }
+          pix_settings: {
+            expires_in: 3600,
+          },
+          accepted_payment_methods: ["credit_card", "pix"],
+        },
+        cart_settings: {
+          items: [
+            {
+              amount: Math.round(convertPriceToIntCents(giftPrice)),
+              name: giftName,
+              default_quantity: 1,
+            },
+          ],
+        },
+        name: giftName,
+        type: "order",
+      };
 
-        const response = await gerarLinkDePagamento(payload)
+      const response = await gerarLinkDePagamento(payload);
 
-        setPaymentUrl(String(response.url))
+      setPaymentUrl(String(response.url));
     } catch (error) {
-      console.error("Erro ao gerar o código PIX:", error)
+      console.error("Erro ao gerar link da pagina de checkout:", error);
     }
-  }
+  };
 
   useEffect(() => {
-    handledLinkPaymentCreate()
+    handledLinkPaymentCreate();
   }, []);
 
   if (paymentComplete) {
@@ -92,7 +100,8 @@ export default function PaymentPage() {
           </CardHeader>
           <CardContent className="text-center">
             <p className="mb-4 text-gray-700">
-              Um e-mail de confirmação foi enviado com os detalhes da sua compra.
+              Um e-mail de confirmação foi enviado com os detalhes da sua
+              compra.
             </p>
             <p className="font-medium text-rose-700">
               {giftName} - {giftPrice}
@@ -107,7 +116,7 @@ export default function PaymentPage() {
           </CardFooter>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
@@ -126,7 +135,9 @@ export default function PaymentPage() {
           <div className="md:col-span-1">
             <Card className="sticky top-8 border-rose-200">
               <CardHeader>
-                <CardTitle className="font-serif text-rose-800">Resumo do Presente</CardTitle>
+                <CardTitle className="font-serif text-rose-800">
+                  Resumo do Presente
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="relative h-48 w-full overflow-hidden rounded-md bg-rose-100 mb-4">
@@ -162,28 +173,31 @@ export default function PaymentPage() {
           <div className="md:col-span-2">
             <Card className="border-rose-200">
               <CardHeader>
-                <CardTitle className="font-serif text-rose-800">Pagamento</CardTitle>
+                <CardTitle className="font-serif text-rose-800">
+                  Pagamento
+                </CardTitle>
                 <CardDescription className="text-gray-600">
-                  Você será redirecionado para o site do nosso parceiro de pagamentoss
+                  Você será redirecionado para o site do nosso parceiro de
+                  pagamentoss
                 </CardDescription>
               </CardHeader>
-                <CardContent className="p-0 overflow-hidden">
-                  {paymentUrl? (
-                    <iframe 
-                    src={paymentUrl} 
+              <CardContent className="p-0 overflow-hidden">
+                {paymentUrl ? (
+                  <iframe
+                    src={paymentUrl}
                     className="w-full h-[600px] border-0"
                     title="Payment Portal"
-                    />
-                  ) : (
-                    <div className="p-6 text-center">
-                      <p>Carregando página de pagamento...</p>
-                    </div>
-                  )}
-                </CardContent>
+                  />
+                ) : (
+                  <div className="p-6 text-center">
+                    <p>Carregando página de pagamento...</p>
+                  </div>
+                )}
+              </CardContent>
             </Card>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
