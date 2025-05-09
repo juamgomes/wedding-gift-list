@@ -4,28 +4,16 @@ import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, CreditCard, QrCode, BanknoteIcon as Bank, Check } from "lucide-react"
+import { ArrowLeft, Check } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
-import PaymentForm from "@/components/PaymentForms"
-import PixPayment from "@/components/PixPayment"
-import { gerarQrCodePix } from "@/services/payments"
-import Checkout from "@/components/checkout"
+import { gerarLinkDePagamento } from "@/services/payments"
 
 export default function PaymentPage() {
   const searchParams = useSearchParams()
   const [paymentComplete, setPaymentComplete] = useState(false)
-  const [tabSelected, setTabSelected] = useState("card")
-  const [pixCode, setPixCode] = useState("")
-  const [pixImage, setPixImage] = useState("")
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null)
 
-  const tabs = [
-    { name: "Cartão", value: "card", icon: <CreditCard className="h-4 w-4" /> },
-    { name: "PIX", value: "pix", icon: <QrCode className="h-4 w-4" /> },
-  ]
-
-  const giftId = searchParams.get("priceId") || "0"
   const giftName = searchParams.get("name") || "Presente"
   const giftPrice = searchParams.get("price") || "R$ 0,00"
   const giftImage = searchParams.get("image") || "/placeholder.svg?height=300&width=300"
@@ -35,40 +23,57 @@ export default function PaymentPage() {
     return Math.round(numericValue * 100);
   };
 
-  const handlePaymentSuccess = () => {
-    setPaymentComplete(true)
-    // Em uma implementação real, você enviaria os dados para um servidor
-    // e processaria o pagamento com um gateway de pagamento
-  }
-
-  const handledGeneratePixCode = async() => {
+  const handledLinkPaymentCreate = async() => {
     try {
-      const priceInCents = convertPriceToIntCents(giftPrice);
-      const response = await gerarQrCodePix({
-        amount: Number((priceInCents / 100)),
-        expiresIn: 3600,
-        description: `Presente ${giftName} - ${giftPrice}`,
-        customer: {
-          name: "Juan",
-          cellphone: "11999999999",
-          email: "juanmartinsgmess@gmail.com",
-          taxId: "06150407217",
+        const payload = {
+          is_building: false,
+          payment_settings: {
+            credit_card_settings: {
+              installments: [
+                {
+                  number: 1,
+                  total: Number(convertPriceToIntCents(giftPrice)),
+                },
+                {
+                  number: 2,
+                  total: Number(convertPriceToIntCents(giftPrice) / 2),
+                },
+                {
+                  number: 3,
+                  total: Number(convertPriceToIntCents(giftPrice) / 3),
+                }
+              ],
+              operation_type: "auth_and_capture"
+            },
+            pix_settings: {
+              expires_in: 3600,
+            },
+            accepted_payment_methods: ["credit_card", "pix"],
+          },
+          cart_settings: {
+            items: [
+              {
+                amount: convertPriceToIntCents(giftPrice),
+                name: giftName,
+                default_quantity: 1,
+              }
+            ]
+          },
+          name: giftName,
+          type: "order"
         }
-      })
 
-      setPixCode(response.brCode);
-      setPixImage(response.brCodeBase64);
+        const response = await gerarLinkDePagamento(payload)
+
+        setPaymentUrl(String(response.url))
     } catch (error) {
       console.error("Erro ao gerar o código PIX:", error)
     }
   }
 
-
   useEffect(() => {
-    if(tabSelected === "pix") {
-      handledGeneratePixCode()
-    }
-  }, [tabSelected]) 
+    handledLinkPaymentCreate()
+  }, []);
 
   if (paymentComplete) {
     return (
@@ -159,36 +164,22 @@ export default function PaymentPage() {
               <CardHeader>
                 <CardTitle className="font-serif text-rose-800">Pagamento</CardTitle>
                 <CardDescription className="text-gray-600">
-                  Escolha a forma de pagamento para presentear os noivos
+                  Você será redirecionado para o site do nosso parceiro de pagamentoss
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="card">
-                  <TabsList className="grid grid-cols-2 mb-6 gap-5">
-                    {tabs.map((tab) => (
-                      <TabsTrigger
-                        key={tab.value}
-                        value={tab.value}
-                        className="flex items-center gap-2"
-                        onClick={() => setTabSelected(tab.value)}
-                      >
-                        {tab.icon}
-                        <span className="hidden sm:inline">{tab.name}</span>
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-
-                  <TabsContent value="card">
-                  <div id="checkout">
-                    <Checkout priceId={giftId} />
-                  </div>
-                  </TabsContent>
-
-                  <TabsContent value="pix">
-                    <PixPayment pixCode={pixCode} pixImage={pixImage} onPaymentSuccess={handlePaymentSuccess} />
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
+                <CardContent className="p-0 overflow-hidden">
+                  {paymentUrl? (
+                    <iframe 
+                    src={paymentUrl} 
+                    className="w-full h-[600px] border-0"
+                    title="Payment Portal"
+                    />
+                  ) : (
+                    <div className="p-6 text-center">
+                      <p>Carregando página de pagamento...</p>
+                    </div>
+                  )}
+                </CardContent>
             </Card>
           </div>
         </div>

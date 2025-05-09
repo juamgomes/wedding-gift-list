@@ -1,36 +1,18 @@
 import axios from 'axios';
 
-// Create axios instance with default configuration
-const api = axios.create({
-    baseURL: 'https://api.abacatepay.com/v1',
+const pagar_me_api = axios.create({
+    baseURL: 'https://sdx-api.pagar.me/core/v5',
     headers: {
-        Authorization: 'Bearer abc_dev_HJfqHpha5ddQLqBCZnYh4T54',
-        'Content-Type': 'application/json'
+        Accept: 'application/json',
+        'content-type': 'application/json',
+        Authorization: `Basic ${Buffer.from(process.env.NEXT_PUBLIC_PAGARME_API_KEY || '').toString('base64')}`,
     }
 });
 
-export const gerarQrCodePix = async (dados: PaymentPix) => {
+export const gerarLinkDePagamento = async (data: ILinkPaymentCreate) => {
     try {
-        const response = await api.post('/pixQrCode/create', dados);
+        const response = await pagar_me_api.post('/paymentlinks', data);
         return response.data;
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
-}
-
-export const criarUmaNovaCobranca = async (dados: PaymentPix) => {
-    try {
-        const options = {
-            method: 'POST',
-            headers: {Authorization: 'Bearer <token>', 'Content-Type': 'application/json'},
-            body: '{"frequency":"ONE_TIME","methods":["PIX"],"products":[{"externalId":"prod-1234","name":"Assinatura de Programa Fitness","description":"Acesso ao programa fitness premium por 1 mês.","quantity":2,"price":2000}],"returnUrl":"https://example.com/billing","completionUrl":"https://example.com/completion","customerId":"cust_abcdefghij","customer":{"name":"Daniel Lima","cellphone":"(11) 4002-8922","email":"daniel_lima@abacatepay.com","taxId":"123.456.789-01"}}'
-          };
-          
-          fetch('https://api.abacatepay.com/v1/billing/create', options)
-            .then(response => response.json())
-            .then(response => console.log(response))
-            .catch(err => console.error(err));
     } catch (error) {
         console.error(error);
         throw error;
@@ -47,4 +29,41 @@ export interface PaymentPix {
         email: string;
         taxId: string;
     };
+}
+interface ILinkPaymentCreate {
+  is_building: boolean;
+  payment_settings: Paymentsettings;
+  cart_settings: Cartsettings;
+  name: string;
+  type: string;
+}
+
+interface Cartsettings {
+  items: Item[];
+}
+
+interface Item {
+  amount: number;
+  name: string;
+  default_quantity: number;
+}
+
+interface Paymentsettings {
+  credit_card_settings: Creditcardsettings;
+  pix_settings: Pixsettings;
+  accepted_payment_methods: string[];
+}
+
+interface Pixsettings {
+  expires_in: number;
+}
+
+interface Creditcardsettings {
+  installments: Installment[];
+  operation_type: string;
+}
+
+interface Installment {
+  number: number;
+  total: number;
 }
