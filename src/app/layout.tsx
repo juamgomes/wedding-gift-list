@@ -10,8 +10,8 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  title: "Lista de Presentes - Maria & João",
-  description: "Lista de presentes para o casamento de Maria e João",
+  title: "Lista de Presentes - Juan e Poliana",
+  description: "Lista de presentes para o casamento de Juan e Poliana",
 }
 
 export default function RootLayout({
