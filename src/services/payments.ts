@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const pagar_me_api = axios.create({
-    baseURL: 'https://sdx-api.pagar.me/core/v5',
+    baseURL: process.env.NEXT_PUBLIC_BASE_URL,
     headers: {
         Accept: 'application/json',
         'content-type': 'application/json',
