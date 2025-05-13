@@ -14,17 +14,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
-import { gerarLinkDePagamento } from "@/services/payments";
+import { gerarLinkDePagamento, IPaymentLink } from "@/services/payments";
 
 export default function PaymentPage() {
   const searchParams = useSearchParams();
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+  const [paymentData, setPaymentData] = useState<IPaymentLink | null>(null);
 
-  const giftName = searchParams.get("name") || "Presente";
-  const giftPrice = searchParams.get("price") || "R$ 0,00";
+  const giftName = searchParams?.get("name") || "Presente";
+  const giftPrice = searchParams?.get("price") || "R$ 0,00";
   const giftImage =
-    searchParams.get("image") || "/placeholder.svg?height=300&width=300";
+    searchParams?.get("image") || "/placeholder.svg?height=300&width=300";
 
   const convertPriceToIntCents = (price: string): number => {
     const numericValue = Number(price.replace("R$ ", "").replace(",", "."));
@@ -73,11 +74,58 @@ export default function PaymentPage() {
 
       const response = await gerarLinkDePagamento(payload);
 
+      setPaymentData(response);
       setPaymentUrl(String(response.url));
     } catch (error) {
       console.error("Erro ao gerar link da pagina de checkout:", error);
     }
   };
+
+  const handledGetPaymentStatus = async () => {
+    try {
+      if (!paymentData?.order_code) return;
+
+      const response = await fetch(
+        `/api/pagar-me-webhook?orderId=${paymentData.order_code}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Falha ao verificar status do pagamento");
+      }
+
+      const data = await response.json();
+
+      // Verifica se data é um array (do find) ou um objeto direto
+      const paymentStatus = Array.isArray(data) ? data[0]?.status : data.status;
+
+      if (paymentStatus === "paid") {
+        setPaymentComplete(true);
+      } else if (
+        ["refused", "canceled", "pending_refund"].includes(paymentStatus)
+      ) {
+        setPaymentComplete(false);
+        alert("Pagamento não autorizado ou cancelado.");
+      }
+    } catch (error) {
+      console.error("Erro ao verificar o status do pagamento:", error);
+    }
+  };
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (paymentData?.order_code) {
+      intervalId = setInterval(() => {
+        handledGetPaymentStatus();
+      }, 2000);
+
+      handledGetPaymentStatus();
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [paymentData?.order_code]);
 
   useEffect(() => {
     handledLinkPaymentCreate();
@@ -95,13 +143,12 @@ export default function PaymentPage() {
               Pagamento Confirmado!
             </CardTitle>
             <CardDescription className="text-gray-600">
-              Obrigado por presentear Maria & João
+              Obrigado por presentear Juan & Poliana
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
             <p className="mb-4 text-gray-700">
-              Um e-mail de confirmação foi enviado com os detalhes da sua
-              compra.
+              Você ajudou a tornar o dia deles ainda mais especial!
             </p>
             <p className="font-medium text-rose-700">
               {giftName} - {giftPrice}
@@ -177,8 +224,8 @@ export default function PaymentPage() {
                   Pagamento
                 </CardTitle>
                 <CardDescription className="text-gray-600">
-                  Você será redirecionado para o site do nosso parceiro de
-                  pagamentoss
+                  Esse é um link de pagamento seguro. Você pode pagar com cartão de
+                  crédito ou PIX. O pagamento será processado pela Pagarme
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0 overflow-hidden">
