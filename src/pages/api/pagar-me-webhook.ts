@@ -9,6 +9,7 @@ export default async function handler(
   await connectToDatabase();
   if (req.method === "POST") {
     const { body } = req as { body: PagarmeWebhookPayload };
+    console.log("🚀 ~ body:", body.data)
 
     const cobranca = new CobrancaStatus({
       status: body.data.status,

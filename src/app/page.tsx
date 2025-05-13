@@ -2,7 +2,7 @@
 import GiftCard from "@/components/GiftCard";
 import Header from "@/components/Header";
 import Loading from "@/components/ui/Loading";
-import { fetchGifts, IGift } from "@/services/products";
+import { IGift } from "@/services/products";
 import { useEffect, useState } from "react";
 // Dados de exemplo para os presentes
 // https://drive.google.com/file/d/1TmxcHpmsP6gTp2OlffIoa9V5JSp6WGEb/view?usp=drive_link
@@ -13,8 +13,9 @@ export default function Home() {
 
   const getGifts = async () => {
     try {
-      const response = await fetchGifts();
-      setGifts(response);
+      const response = await fetch("/api/lista-de-presentes");
+      const data = await response.json();
+      setGifts(data);
     } catch (error) {
       console.error("Erro ao buscar presentes:", error);
     } finally {
@@ -44,7 +45,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {gifts.map((gift) => (
-              <GiftCard key={gift.id} gift={gift} />
+              <GiftCard key={gift._id} gift={gift} />
             ))}
           </div>
         </section>

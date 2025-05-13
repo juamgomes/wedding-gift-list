@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Link from "next/link"
 
 interface Gift {
-  id: number
+  _id: string
   name: string
   price: string
   description: string
