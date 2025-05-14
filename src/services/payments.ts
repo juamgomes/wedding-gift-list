@@ -59,13 +59,16 @@ interface Pixsettings {
 }
 
 interface Creditcardsettings {
-  installments: Installment[];
+  installments_setup: Installment;
   operation_type: string;
 }
 
 interface Installment {
-  number: number;
-  total: number;
+  interest_rate: number,
+  interest_type: string,
+  customer_fee: boolean,
+  max_installments: number,
+  amount: number,
 }
 
 export interface IPaymentLink {

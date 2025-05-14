@@ -31,27 +31,20 @@ export default function PaymentPage() {
     const numericValue = Number(price.replace("R$ ", "").replace(",", "."));
     return Math.round(numericValue * 100);
   };
-
+  
   const handledLinkPaymentCreate = async () => {
     try {
       const payload = {
         is_building: false,
         payment_settings: {
           credit_card_settings: {
-            installments: [
-              {
-                number: 1,
-                total: Math.round(convertPriceToIntCents(giftPrice)),
-              },
-              {
-                number: 2,
-                total: Math.round(convertPriceToIntCents(giftPrice) / 2),
-              },
-              {
-                number: 3,
-                total: Math.round(convertPriceToIntCents(giftPrice) / 3),
-              },
-            ],
+            installments_setup: {
+              interest_rate: 14,
+              interest_type: "simple",
+              customer_fee: true,
+              max_installments: 3,
+              amount: Math.round(convertPriceToIntCents(giftPrice)),
+            },
             operation_type: "auth_and_capture",
           },
           pix_settings: {
