@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,6 +21,7 @@ export default function PaymentPage() {
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [paymentData, setPaymentData] = useState<IPaymentLink | null>(null);
+  const [countdown, setCountdown] = useState(5);
 
   const giftName = searchParams?.get("name") || "Presente";
   const giftPrice = searchParams?.get("price") || "R$ 0,00";
@@ -31,7 +32,7 @@ export default function PaymentPage() {
     const numericValue = Number(price.replace("R$ ", "").replace(",", "."));
     return Math.round(numericValue * 100);
   };
-  
+
   const handledLinkPaymentCreate = async () => {
     try {
       const payload = {
@@ -119,6 +120,24 @@ export default function PaymentPage() {
       if (intervalId) clearInterval(intervalId);
     };
   }, [paymentData?.order_code]);
+  
+
+  useEffect(() => {
+    if (paymentUrl) {
+      const interval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            window.open(paymentUrl, '_blank');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [paymentUrl]);
 
   useEffect(() => {
     handledLinkPaymentCreate();
@@ -217,17 +236,17 @@ export default function PaymentPage() {
                   Pagamento
                 </CardTitle>
                 <CardDescription className="text-gray-600">
-                  Esse é um link de pagamento seguro. Você pode pagar com cartão de
-                  crédito ou PIX. O pagamento será processado pela Pagarme
+                  Esse é um link de pagamento seguro. Você pode pagar com cartão
+                  de crédito ou PIX. O pagamento será processado pela Pagarme
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0 overflow-hidden">
                 {paymentUrl ? (
-                  <iframe
-                    src={paymentUrl}
-                    className="w-full h-[600px] border-0"
-                    title="Payment Portal"
-                  />
+                  <div className="p-6 text-center">
+                    <p>
+                      Você será redirecionado para a página de pagamento em {countdown} segundos...
+                    </p>
+                  </div>
                 ) : (
                   <div className="p-6 text-center">
                     <p>Carregando página de pagamento...</p>
