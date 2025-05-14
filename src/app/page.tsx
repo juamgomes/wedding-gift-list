@@ -37,10 +37,11 @@ export default function Home() {
             Nossa Lista de Presentes
           </h2>
           <p className="max-w-2xl mx-auto text-gray-700 mb-12">
-            Agradecemos por fazer parte deste momento tão especial em nossas
-            vidas. Sua presença é o nosso maior presente, mas se desejar nos
-            presentear, selecionamos alguns itens que nos ajudarão a construir
-            nosso novo lar.
+            Agradecemos por fazer parte deste momento tão especial em nossas vidas. 
+            Sua presença é o nosso maior presente, mas, se desejar nos presentear, 
+            selecionamos alguns itens que nos ajudarão a construir nosso novo lar. 
+            Ao escolher um item, você não o compra diretamente; apenas repassa o 
+            valor correspondente para nós e, depois, cuidaremos da aquisição.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
