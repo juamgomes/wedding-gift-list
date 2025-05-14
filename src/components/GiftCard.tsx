@@ -25,21 +25,21 @@ export default function GiftCard({ gift }: GiftCardProps) {
 
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg border-rose-200 hover:border-rose-300">
-      <div className="relative h-48 w-full overflow-hidden bg-rose-100">
+      <div className="relative h-48 w-full overflow-hidden bg-white">
         <Image
           src={gift.image || "/placeholder.svg"}
           alt={gift.name}
           fill
-          className="object-cover"
+          className="object-contain"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
       </div>
       <CardHeader className="pb-2">
         <CardTitle className="font-serif text-rose-800">{gift.name}</CardTitle>
-        <CardDescription className="text-lg font-medium text-rose-600">{gift.price}</CardDescription>
+        <CardDescription className="text-lg font-medium text-rose-600">R$ {gift.price}</CardDescription>
       </CardHeader>
       <CardContent>
-        <p className="text-gray-600">{gift.description}</p>
+        <p className="text-gray-600 text-sm">{gift.description}</p>
       </CardContent>
       <CardFooter>
       <Link href={`/payment?${paymentParams}`} className="w-full">
