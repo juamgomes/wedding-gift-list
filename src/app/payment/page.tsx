@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,7 +21,6 @@ export default function PaymentPage() {
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [paymentData, setPaymentData] = useState<IPaymentLink | null>(null);
-  const [countdown, setCountdown] = useState(5);
 
   const giftName = searchParams?.get("name") || "Presente";
   const giftPrice = searchParams?.get("price") || "R$ 0,00";
@@ -120,24 +119,13 @@ export default function PaymentPage() {
       if (intervalId) clearInterval(intervalId);
     };
   }, [paymentData?.order_code]);
-  
 
-  useEffect(() => {
+  const pagarMe = () => {
     if (paymentUrl) {
-      const interval = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            window.open(paymentUrl, '_blank');
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(interval);
+      window.open(paymentUrl, "_blank");
+      return 0;
     }
-  }, [paymentUrl]);
+  };
 
   useEffect(() => {
     handledLinkPaymentCreate();
@@ -243,9 +231,7 @@ export default function PaymentPage() {
               <CardContent className="p-0 overflow-hidden">
                 {paymentUrl ? (
                   <div className="p-6 text-center">
-                    <p>
-                      Você será redirecionado para a página de pagamento em {countdown} segundos...
-                    </p>
+                    <Button className="w-full text-white bg-rose-600 hover:bg-rose-700" onClick={pagarMe}>Pagar</Button>
                   </div>
                 ) : (
                   <div className="p-6 text-center">
