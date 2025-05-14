@@ -44,6 +44,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/AlertDialog";
 import { AdminProtection } from "@/components/AdminProtect";
+import { alertSuccess } from "@/lib/alerts";
 
 interface Gift {
   _id: string;
@@ -97,9 +98,12 @@ export default function AdminGiftsPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newGift),
+        body: isEditing ? JSON.stringify({ ...newGift, id: currentGift?._id }) : JSON.stringify(newGift),
       });
 
+      if (isEditing) {
+        handleUpdateGift();
+      }
       await handleGetGifts();
       setNewGift({
         name: "",
@@ -107,7 +111,7 @@ export default function AdminGiftsPage() {
         description: "",
         image: "",
       });
-      window.alert("Presente adicionado com sucesso!");
+      isEditing ? alertSuccess("Presente atualizado com sucesso!") : alertSuccess("Presente adicionado com sucesso!");
     } catch (error) {
       console.error("Erro ao adicionar presente:", error);
     }
@@ -375,7 +379,7 @@ export default function AdminGiftsPage() {
             className="space-y-6"
             onSubmit={(e) => {
               e.preventDefault();
-              handleUpdateGift();
+              handleAddGift();
             }}
           >
             <div className="space-y-4">

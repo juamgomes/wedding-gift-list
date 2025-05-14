@@ -12,7 +12,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } catch (error) {
       res.status(500).json({ error: 'Erro ao buscar a lista de presentes' });
     }
-  } else if (req.method === 'POST') {
+  } 
+  
+  else if (req.method === 'POST') {
     try {
       const { id, description, name, price, image } = req.body;
       const novoPresente = new ListadePresentes({ id, description, name, price, image });
@@ -21,7 +23,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } catch (error) {
       res.status(500).json({ error: 'Erro ao adicionar o presente' });
     }
-  } else if(req.method === "put") {
+  } 
+  
+  else if(req.method === "PUT") {
     try {
       const { id, description, name, price, image } = req.body;
       const presenteAtualizado = await ListadePresentes.findByIdAndUpdate(id, { description, name, price, image }, { new: true });
@@ -32,7 +36,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } catch (error) {
       res.status(500).json({ error: 'Erro ao atualizar o presente' });
     }
-  } else if (req.method === "DELETE") {
+  } 
+  
+  else if (req.method === "DELETE") {
     try {
       const { id } = req.query;
       if (!id) {
@@ -46,7 +52,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } catch (error) {
       res.status(500).json({ error: 'Erro ao deletar o presente' });
     }
-  } else {
+  } 
+  
+  else {
     res.setHeader('Allow', ['GET', 'POST']);
     res.status(405).end(`Método ${req.method} não permitido`);
   }
