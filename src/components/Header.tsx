@@ -1,4 +1,6 @@
 import Image from "next/image"
+import { Button } from "./ui/Button"
+import Link from "next/link"
 
 export default function Header() {
   return (
@@ -21,6 +23,10 @@ export default function Header() {
           Compartilhe a alegria do nosso amor neste dia especial
         </p>
         <p className="mt-6 text-lg font-serif">26 de Julho de 2025</p>
+
+          <Button className="mt-10 bg-rose-600 hover:bg-rose-700">
+              <Link href="/confirm">Confirmar presença</Link>
+          </Button>
       </div>
     </header>
   )
