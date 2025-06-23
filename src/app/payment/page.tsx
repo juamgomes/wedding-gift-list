@@ -39,7 +39,7 @@ export default function PaymentPage() {
         payment_settings: {
           credit_card_settings: {
             installments_setup: {
-              interest_rate: 14,
+              interest_rate: 8,
               interest_type: "simple",
               customer_fee: true,
               max_installments: 3,

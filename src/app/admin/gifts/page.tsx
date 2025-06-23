@@ -54,12 +54,20 @@ interface Gift {
   image: string;
 }
 
+interface Convidados {
+  _id: string;
+  name: string;
+  guests: number;
+  attending: boolean;
+}
+
 export default function AdminGiftsPage() {
   const [gifts, setGifts] = useState<Gift[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentGift, setCurrentGift] = useState<Gift | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [convidados, setConvidados] = useState<Convidados[]>([]);
   const router = useRouter();
 
   // Formulário para novo presente
@@ -164,6 +172,25 @@ export default function AdminGiftsPage() {
     }
   };
 
+  const handleGetConvidados = async () => {
+    try {
+      const response = await fetch("/api/confirm-presence");
+      if (!response.ok) {
+        throw new Error("Erro ao buscar convidados");
+      }
+      const data = await response.json();
+      setConvidados(data);
+    } catch (error) {
+      console.error("Erro ao buscar convidados:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      handleGetConvidados();
+    }
+  }, [isAuthenticated]);
+
   if (!isAuthenticated) {
     return <AdminProtection onAuthenticate={() => setIsAuthenticated(true)} />;
   }
@@ -189,9 +216,10 @@ export default function AdminGiftsPage() {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="list" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8 gap-4">
+          <TabsList className="grid w-full grid-cols-3 mb-8 gap-4">
             <TabsTrigger value="list">Lista de Presentes</TabsTrigger>
             <TabsTrigger value="add">Adicionar Presente</TabsTrigger>
+            <TabsTrigger value="cv">Convidados</TabsTrigger>
           </TabsList>
 
           <TabsContent value="list">
@@ -358,6 +386,47 @@ export default function AdminGiftsPage() {
                     <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Presente
                   </Button>
                 </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="cv">
+            <Card className="border-rose-200">
+              <CardHeader>
+                <CardTitle className="font-serif text-rose-800">
+                  Convidados
+                </CardTitle>
+                <CardDescription>
+                  Aqui você pode gerenciar os convidados do casamento.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Nome
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Convidados
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Presença Confirmada
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {convidados.map((guest, idx) => (
+                        <tr key={idx}>
+                          <td className="px-6 py-4 whitespace-nowrap">{guest.name}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">{guest.guests}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {guest.attending ? "Sim" : "Não"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
               </CardContent>
             </Card>
           </TabsContent>

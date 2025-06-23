@@ -14,5 +14,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } catch (error) {
       console.error("Erro ao confirmar presença:", error);
     }
+  } if (req.method === 'GET') {
+    try {
+      const confirmacoes = await ConfirmcaoDePresenca.find();
+      res.status(200).json(confirmacoes);
+    } catch (error) {
+      console.error("Erro ao buscar confirmações de presença:", error);
+      res.status(500).json({ error: "Erro ao buscar confirmações de presença" });
+    }
   }
 }
